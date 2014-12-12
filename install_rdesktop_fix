@@ -1,0 +1,301 @@
+#!/bin/bash
+
+# Help output
+if [ $# -lt 1 ] || [[ $1 == *"help"* ]] || [[ $1 == *"?"* ]]; then
+	echo "Usage: rdesktop_cursor_fix [ARG] [OPT1] [OPT2]"
+	echo "       ARG: Folder location with Microsoft Windows(R) 7 icons."
+	echo "	     E.g. C:\Windows\Cursers"
+    echo "	     Can also easily be downloaded from internet."
+    echo "       Optional:"				
+	echo "       OPT1: Folder with pngs extracted from"
+	echo "             animated curser files aero_working.ani / aero_busy.ani."
+	echo "             The png of the animation frames should have file names like:"     
+	echo "             aero_working-X.png / aero_busy-X.png,  with x = 0 .. 17"
+	echo "       OPT2: Installation location, standard is ~/.icons/aero_cursors"  
+	exit
+fi
+
+# Create installation directory if needed
+if [ $# -gt 2 ]; then
+	INST_DIR=$1
+else
+	INST_DIR="$HOME/.icons/aero_cursors"
+fi
+
+echo "Install cursors to fix rdesktop in $INST_DIR? [Y] / [n]"
+read userinput
+if [ $userinput = "Y" ]; then
+	mkdir -p $INST_DIR
+else
+	echo "aborted"
+	exit
+fi
+
+# Convert cursors to pngs
+echo "Create cursors from $1"
+for f in $1/*.cur; do
+	icotool --cursor -x --width=32 --height=32 "$f" -o ./xcursorgen/"$(basename ${f%.cur}).png"
+done
+
+# Copy prepared png files from ani extraction (optional)
+if [ $# -gt 1 ]; then
+	cp $2/*.png ./xcursorgen/
+else
+	echo "Animated cursor files not provided."
+fi
+
+echo "Install cursors in $INST_DIR"
+# Create x11 cursors with correct position description
+for f in xcursorgen/*.cursor; do
+	if ( [ $# -lt 2 ] ) && ( [[ $f == *"aero_busy"* ]] || [[ $f == *"aero_working"* ]] ); then  # do not create animeted cursors
+		continue
+	fi
+	xcursorgen "$f" $INST_DIR/"$(basename ${f%.cursor})"
+done
+
+# Delete temporary png files
+rm xcursorgen/*.png
+
+# Link new cursors, only aero hashes identified so far. To find not defined ones run XCURSOR_DISCOVER=1 rdesktop ...
+# http://unix.stackexchange.com/questions/140096/how-to-override-custom-mouse-cursor-with-xcursor
+# Identified, not animated cursers
+echo "Linking cursors for rdesktop."
+ln -s -f $INST_DIR/aero_arrow ~/.icons/default/cursors/24020000002800000528000084810000  # xterm
+ln -s -f $INST_DIR/aero_select ~/.icons/default/cursors/00000000017e000002fc000000000000  # right_ptr
+ln -s -f $INST_DIR/aero_alt ~/.icons/default/cursors/00000093000010860000631100006609  # plus
+
+ln -s -f $INST_DIR/aero_arrow ~/.icons/default/cursors/01e00000201c00004038000080300000  # left_ptr, normal cursor
+ln -s -f $INST_DIR/aero_arrow_l ~/.icons/default/cursors/84050000800a0000a000000000480000  # left_ptr, normal cursor
+ln -s -f $INST_DIR/aero_arrow_xl ~/.icons/default/cursors/10a402001080080000050000d0108000  # left_ptr, normal cursor
+
+ln -s -f $INST_DIR/aero_link ~/.icons/default/cursors/85000000408000002008000082440000  # link hand
+ln -s -f $INST_DIR/aero_link_l ~/.icons/default/cursors/730420008e00a00005100800d0000000  # link hand
+ln -s -f $INST_DIR/aero_link_xl ~/.icons/default/cursors/9410024028000041a600011085000004  # link hand
+
+ln -s -f $INST_DIR/aero_ns ~/.icons/default/cursors/00000000000000000000000000000000  # up down arrow
+ln -s -f $INST_DIR/aero_ns_l ~/.icons/default/cursors/5820000049200000290400002c100000  # up down arrow
+ln -s -f $INST_DIR/aero_ns_xl ~/.icons/default/cursors/44410000000000001105000011110000  # up down arrow
+
+ln -s -f $INST_DIR/aero_ew ~/.icons/default/cursors/0c003000180060004800210009002400  # left right arrow
+ln -s -f $INST_DIR/aero_ew_l ~/.icons/default/cursors/04004041000000001000010511000011  # left right arrow
+ln -s -f $INST_DIR/aero_ew_xl ~/.icons/default/cursors/0000000028002800880088000a000a00  # left right arrow
+
+ln -s -f $INST_DIR/aero_helpsel ~/.icons/default/cursors/24868000002802000508010084a52000  # question mark curser
+ln -s -f $INST_DIR/aero_helpsel_l ~/.icons/default/cursors/84059200800a0222a000200000482000  # question mark curser
+ln -s -f $INST_DIR/aero_helpsel_xl ~/.icons/default/cursors/10a482801080882000054898d0109080  # question mark curser
+
+ln -s -f $INST_DIR/aero_move ~/.icons/default/cursors/14001400440044000500050000000000  # move curser (cross arrows)
+ln -s -f $INST_DIR/aero_move_l ~/.icons/default/cursors/0424200024b490008496120002121000  # move curser (cross arrows)
+ln -s -f $INST_DIR/aero_move_xl ~/.icons/default/cursors/04440141000000001011040511111111  # move curser (cross arrows)
+
+ln -s -f $INST_DIR/aero_nesw ~/.icons/default/cursors/44440000444000004040000004440000  # nesw (diagonal arrow)
+ln -s -f $INST_DIR/aero_nesw_l ~/.icons/default/cursors/8080000080800000a0a0000080008000  # nesw (diagonal arrow)
+ln -s -f $INST_DIR/aero_nesw_xl ~/.icons/default/cursors/41000500010100000145000001000100  # nesw (diagonal arrow)
+
+ln -s -f $INST_DIR/aero_nwse ~/.icons/default/cursors/44440000101100000404000011100000  # nesw (diagonal arrow)
+ln -s -f $INST_DIR/aero_nwse_l ~/.icons/default/cursors/28280000808000000202000008000800  # nesw (diagonal arrow)
+ln -s -f $INST_DIR/aero_nwse_xl ~/.icons/default/cursors/14005000400040000145000004040000  # nesw (diagonal arrow)
+
+ln -s -f $INST_DIR/aero_pen ~/.icons/default/cursors/35a08000604002000501280004040000  # pen cursor
+ln -s -f $INST_DIR/aero_pen_l ~/.icons/default/cursors/25000a03000009008400a0000200ba81  # pen cursor
+ln -s -f $INST_DIR/aero_pen_xl ~/.icons/default/cursors/2c004008300017084004044801181009  # pen cursor
+
+ln -s -f $INST_DIR/aero_up ~/.icons/default/cursors/28000000880000000a00000008080000  # up arrow
+ln -s -f $INST_DIR/aero_up_l ~/.icons/default/cursors/48000000090000000804000008100000  # up arrow
+ln -s -f $INST_DIR/aero_up_xl ~/.icons/default/cursors/80800000000000002008000020200000  # up arrow
+
+ln -s -f $INST_DIR/aero_unavail ~/.icons/default/cursors/00000000484800000909000000000000  # unavailable curser
+ln -s -f $INST_DIR/aero_unavail_l ~/.icons/default/cursors/00404000280024005002480002030200  # unavailable curser
+ln -s -f $INST_DIR/aero_unavail_xl ~/.icons/default/cursors/0000002083000c024c006600e0000380  # unavailable curser
+
+# single frames of animated cursor (ring animation, 3 sizes)
+if ( [ $# -gt 1 ] ); then
+	ln -s -f $INST_DIR/aero_working_static_0 ~/.icons/default/cursors/64c1190008110a0015804500a0041000
+	ln -s -f $INST_DIR/aero_working_static_1 ~/.icons/default/cursors/6ce0180090108e0005814700a0021400
+	ln -s -f $INST_DIR/aero_working_static_2 ~/.icons/default/cursors/6ce3180080550e0006874100a4031c00
+	ln -s -f $INST_DIR/aero_working_static_3 ~/.icons/default/cursors/6c851900004d8a00168f4100a0090c00
+	ln -s -f $INST_DIR/aero_working_static_4 ~/.icons/default/cursors/6803190088718200068d4100a40a8c00
+	ln -s -f $INST_DIR/aero_working_static_5 ~/.icons/default/cursors/6c13180018578200178e5100a0118c00
+	ln -s -f $INST_DIR/aero_working_static_6 ~/.icons/default/cursors/2c101a0010688a000700510080919400
+	ln -s -f $INST_DIR/aero_working_static_7 ~/.icons/default/cursors/6c032a00907d7a00060e9100a0118400
+	ln -s -f $INST_DIR/aero_working_static_8 ~/.icons/default/cursors/6c072200116d4a00070a8100a0118700
+	ln -s -f $INST_DIR/aero_working_static_9 ~/.icons/default/cursors/2c03b000116db2000704a2008091c500
+	ln -s -f $INST_DIR/aero_working_static_10 ~/.icons/default/cursors/2c07b800116da300270091008011c700
+	ln -s -f $INST_DIR/aero_working_static_11 ~/.icons/default/cursors/2c01a0001169b6002700f6008010dc00
+	ln -s -f $INST_DIR/aero_working_static_12 ~/.icons/default/cursors/2c21aa001169b5002700d4008010d800
+	ln -s -f $INST_DIR/aero_working_static_13 ~/.icons/default/cursors/6ca1b4001169ac002720790080105000
+	ln -s -f $INST_DIR/aero_working_static_14 ~/.icons/default/cursors/2cd2b9001169a5002720dc0080815500
+	ln -s -f $INST_DIR/aero_working_static_15 ~/.icons/default/cursors/2c201900116802002720510080880d00
+	ln -s -f $INST_DIR/aero_working_static_16 ~/.icons/default/cursors/2ce0ba001118040027c1550080095400
+	ln -s -f $INST_DIR/aero_working_static_17 ~/.icons/default/cursors/24c0bb00100800002641550082095800
+	ln -s -f $INST_DIR/aero_working_static_0 ~/.icons/default/cursors/c0c1200051501d0000778a0002852000
+	ln -s -f $INST_DIR/aero_working_static_1 ~/.icons/default/cursors/c0b123004072140020758a0002812800
+	ln -s -f $INST_DIR/aero_working_static_2 ~/.icons/default/cursors/c0c3210051fa1400027f8000028f3000
+	ln -s -f $INST_DIR/aero_working_static_3 ~/.icons/default/cursors/c00b230050ea1500226f820002931000
+	ln -s -f $INST_DIR/aero_working_static_4 ~/.icons/default/cursors/c887220041b21500026b8200029f1100
+	ln -s -f $INST_DIR/aero_working_static_5 ~/.icons/default/cursors/c047000040de1500206fa20002a31100
+	ln -s -f $INST_DIR/aero_working_static_6 ~/.icons/default/cursors/4021240050a015000070a20042a20100
+	ln -s -f $INST_DIR/aero_working_static_7 ~/.icons/default/cursors/c0074400508af400026c230002a32100
+	ln -s -f $INST_DIR/aero_working_static_8 ~/.icons/default/cursors/c0074410508834200064030002a30700
+	ln -s -f $INST_DIR/aero_working_static_9 ~/.icons/default/cursors/4007700150a865000078054042a20380
+	ln -s -f $INST_DIR/aero_working_static_10 ~/.icons/default/cursors/400f600150a845020030270442a20380
+	ln -s -f $INST_DIR/aero_working_static_11 ~/.icons/default/cursors/4003500150a04d200030ad4042a13180
+	ln -s -f $INST_DIR/aero_working_static_12 ~/.icons/default/cursors/4041440150a049220070ad0042a13980
+	ln -s -f $INST_DIR/aero_working_static_13 ~/.icons/default/cursors/4047790150a059000070a64442a12088
+	ln -s -f $INST_DIR/aero_working_static_14 ~/.icons/default/cursors/40a1230150a249020070bd0442812280
+	ln -s -f $INST_DIR/aero_working_static_15 ~/.icons/default/cursors/4041220050a204000070a20042901200
+	ln -s -f $INST_DIR/aero_working_static_16 ~/.icons/default/cursors/40c165015042082000b3aa0042932080
+	ln -s -f $INST_DIR/aero_working_static_17 ~/.icons/default/cursors/40916701506000000232aa0046933880
+	ln -s -f $INST_DIR/aero_working_static_0 ~/.icons/default/cursors/00063ca2436c04a340b0405140098641
+	ln -s -f $INST_DIR/aero_working_static_1 ~/.icons/default/cursors/00047482434a448240b4005140090640
+	ln -s -f $INST_DIR/aero_working_static_2 ~/.icons/default/cursors/00027882437944824071c0504048c441
+	ln -s -f $INST_DIR/aero_working_static_3 ~/.icons/default/cursors/00022182435942a24077c050400b4041
+	ln -s -f $INST_DIR/aero_working_static_4 ~/.icons/default/cursors/000394824372c4a040734050400ae041
+	ln -s -f $INST_DIR/aero_working_static_5 ~/.icons/default/cursors/0002c08243df44a24037805040092441
+	ln -s -f $INST_DIR/aero_working_static_6 ~/.icons/default/cursors/00128482435402a24010005440016241
+	ln -s -f $INST_DIR/aero_working_static_7 ~/.icons/default/cursors/00024c824355469e4013806440096641
+	ln -s -f $INST_DIR/aero_working_static_8 ~/.icons/default/cursors/00124d80431546824016806040096681
+	ln -s -f $INST_DIR/aero_working_static_9 ~/.icons/default/cursors/0012c8a0431546ac401100a840094611
+	ln -s -f $INST_DIR/aero_working_static_10 ~/.icons/default/cursors/0012c8a2431542e84019006440016691
+	ln -s -f $INST_DIR/aero_working_static_11 ~/.icons/default/cursors/00124ca1431442ad401800bd40016051
+	ln -s -f $INST_DIR/aero_working_static_12 ~/.icons/default/cursors/001284224314426d401808b540012050
+	ln -s -f $INST_DIR/aero_working_static_13 ~/.icons/default/cursors/0002a4214314422f4018085c40010250
+	ln -s -f $INST_DIR/aero_working_static_14 ~/.icons/default/cursors/001234a2431402694018083740016651
+	ln -s -f $INST_DIR/aero_working_static_15 ~/.icons/default/cursors/00124882431402804018085440016241
+	ln -s -f $INST_DIR/aero_working_static_16 ~/.icons/default/cursors/0012b0a2430c06054028405540014451
+	ln -s -f $INST_DIR/aero_working_static_17 ~/.icons/default/cursors/0014fca2434c02004058505540814650
+else
+	echo "Substitute animated cursors with static cursors."
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/64c1190008110a0015804500a0041000
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6ce0180090108e0005814700a0021400
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6ce3180080550e0006874100a4031c00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6c851900004d8a00168f4100a0090c00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6803190088718200068d4100a40a8c00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6c13180018578200178e5100a0118c00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c101a0010688a000700510080919400
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6c032a00907d7a00060e9100a0118400
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6c072200116d4a00070a8100a0118700
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c03b000116db2000704a2008091c500
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c07b800116da300270091008011c700
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c01a0001169b6002700f6008010dc00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c21aa001169b5002700d4008010d800
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/6ca1b4001169ac002720790080105000
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2cd2b9001169a5002720dc0080815500
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2c201900116802002720510080880d00
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/2ce0ba001118040027c1550080095400
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/24c0bb00100800002641550082095800
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c0c1200051501d0000778a0002852000
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c0b123004072140020758a0002812800
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c0c3210051fa1400027f8000028f3000
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c00b230050ea1500226f820002931000
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c887220041b21500026b8200029f1100
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c047000040de1500206fa20002a31100
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4021240050a015000070a20042a20100
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c0074400508af400026c230002a32100
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/c0074410508834200064030002a30700
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4007700150a865000078054042a20380
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/400f600150a845020030270442a20380
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4003500150a04d200030ad4042a13180
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4041440150a049220070ad0042a13980
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4047790150a059000070a64442a12088
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/40a1230150a249020070bd0442812280
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/4041220050a204000070a20042901200
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/40c165015042082000b3aa0042932080
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/40916701506000000232aa0046933880
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00063ca2436c04a340b0405140098641
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00047482434a448240b4005140090640
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00027882437944824071c0504048c441
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00022182435942a24077c050400b4041
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/000394824372c4a040734050400ae041
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0002c08243df44a24037805040092441
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00128482435402a24010005440016241
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00024c824355469e4013806440096641
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00124d80431546824016806040096681
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0012c8a0431546ac401100a840094611
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0012c8a2431542e84019006440016691
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00124ca1431442ad401800bd40016051
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/001284224314426d401808b540012050
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0002a4214314422f4018085c40010250
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/001234a2431402694018083740016651
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/00124882431402804018085440016241
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0012b0a2430c06054028405540014451
+	ln -s -f $INST_DIR/wait_i ~/.icons/default/cursors/0014fca2434c02004058505540814650
+fi
+# single frames (ring animation without mouse pointer in 2 sizes)
+if ( [ $# -gt 1 ] ); then
+	ln -s -f $INST_DIR/aero_busy_static_0 ~/.icons/default/cursors/fc618c00da110f0034fd0e004e082400
+	ln -s -f $INST_DIR/aero_busy_static_1 ~/.icons/default/cursors/e9eb84003a110f00747c8e00e7082500
+	ln -s -f $INST_DIR/aero_busy_static_2 ~/.icons/default/cursors/f96a84003a71070075fa0e00af042400
+	ln -s -f $INST_DIR/aero_busy_static_3 ~/.icons/default/cursors/990e480013f2090054720e00a8e01c00
+	ln -s -f $INST_DIR/aero_busy_static_4 ~/.icons/default/cursors/4490c200340c830078190700274a1600
+	ln -s -f $INST_DIR/aero_busy_static_5 ~/.icons/default/cursors/9cb6c800fb42090034fc0600a9647c00
+	ln -s -f $INST_DIR/aero_busy_static_6 ~/.icons/default/cursors/9cd7a800db420b0034f80000a9440c00
+	ln -s -f $INST_DIR/aero_busy_static_7 ~/.icons/default/cursors/eeeb1400cda0a500185ec000f0229600
+	ln -s -f $INST_DIR/aero_busy_static_8 ~/.icons/default/cursors/8897db00db530f0071f88800e1443500
+	ln -s -f $INST_DIR/aero_busy_static_9 ~/.icons/default/cursors/8cafe80099505b00756c9800e1442100
+	ln -s -f $INST_DIR/aero_busy_static_10 ~/.icons/default/cursors/8c96da0091114700d06c9000e9503100
+	ln -s -f $INST_DIR/aero_busy_static_11 ~/.icons/default/cursors/8dba4a00113a5700f0288000e1501100
+	ln -s -f $INST_DIR/aero_busy_static_12 ~/.icons/default/cursors/cc3d55003c8f2e00785e400037a2b600
+	ln -s -f $INST_DIR/aero_busy_static_13 ~/.icons/default/cursors/e449c2003c8c0200f8180c0022801600
+	ln -s -f $INST_DIR/aero_busy_static_14 ~/.icons/default/cursors/e4bcd600348c8300f85e400022a69e00
+	ln -s -f $INST_DIR/aero_busy_static_15 ~/.icons/default/cursors/c86f8400681047007068800045096d00
+	ln -s -f $INST_DIR/aero_busy_static_16 ~/.icons/default/cursors/987b84001a11470074f88e004c0c2500
+	ln -s -f $INST_DIR/aero_busy_static_0 ~/.icons/default/cursors/42468200048f0300da5b220418e34680
+	ln -s -f $INST_DIR/aero_busy_static_1 ~/.icons/default/cursors/c2468000048d1900d24f320401e3c080
+	ln -s -f $INST_DIR/aero_busy_static_2 ~/.icons/default/cursors/62448000468d09000d6f224491e30480
+	ln -s -f $INST_DIR/aero_busy_static_3 ~/.icons/default/cursors/02048200e68d0100758e224491e30280
+	ln -s -f $INST_DIR/aero_busy_static_4 ~/.icons/default/cursors/82008000040d01008dcf224401e30280
+	ln -s -f $INST_DIR/aero_busy_static_5 ~/.icons/default/cursors/22428000840f01003cfe224411630380
+	ln -s -f $INST_DIR/aero_busy_static_6 ~/.icons/default/cursors/82c68200440f01004c4e2244c1e30380
+	ln -s -f $INST_DIR/aero_busy_static_7 ~/.icons/default/cursors/42c68000840711006cf6824451638380
+	ln -s -f $INST_DIR/aero_busy_static_8 ~/.icons/default/cursors/02c4800084070b001ce5120431634100
+	ln -s -f $INST_DIR/aero_busy_static_9 ~/.icons/default/cursors/82c48400c40731020df5f24061e34100
+	ln -s -f $INST_DIR/aero_busy_static_10 ~/.icons/default/cursors/c24484008487010288e43240c163c100
+	ln -s -f $INST_DIR/aero_busy_static_11 ~/.icons/default/cursors/82448c00c48f110289e42144e1e34780
+	ln -s -f $INST_DIR/aero_busy_static_12 ~/.icons/default/cursors/02408200048d01008876330443e34000
+	ln -s -f $INST_DIR/aero_busy_static_13 ~/.icons/default/cursors/82c48800848d0300884ea80441e14200
+	ln -s -f $INST_DIR/aero_busy_static_14 ~/.icons/default/cursors/82c68000048f09008844200080e34080
+	ln -s -f $INST_DIR/aero_busy_static_15 ~/.icons/default/cursors/02c68200848d0300825e2a0490c34200
+	ln -s -f $INST_DIR/aero_busy_static_16 ~/.icons/default/cursors/02468000048f0300946f2200a0c3c200
+	ln -s -f $INST_DIR/aero_busy_static_17 ~/.icons/default/cursors/02408000448f110288763900c0634f80
+else
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/fc618c00da110f0034fd0e004e082400
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/e9eb84003a110f00747c8e00e7082500
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/f96a84003a71070075fa0e00af042400
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/990e480013f2090054720e00a8e01c00
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/4490c200340c830078190700274a1600
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/9cb6c800fb42090034fc0600a9647c00
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/9cd7a800db420b0034f80000a9440c00
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/eeeb1400cda0a500185ec000f0229600
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/8897db00db530f0071f88800e1443500
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/8cafe80099505b00756c9800e1442100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/8c96da0091114700d06c9000e9503100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/8dba4a00113a5700f0288000e1501100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/cc3d55003c8f2e00785e400037a2b600
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/e449c2003c8c0200f8180c0022801600
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/e4bcd600348c8300f85e400022a69e00
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/c86f8400681047007068800045096d00
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/987b84001a11470074f88e004c0c2500
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/42468200048f0300da5b220418e34680
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/c2468000048d1900d24f320401e3c080
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/62448000468d09000d6f224491e30480
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02048200e68d0100758e224491e30280
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82008000040d01008dcf224401e30280
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/22428000840f01003cfe224411630380
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82c68200440f01004c4e2244c1e30380
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/42c68000840711006cf6824451638380
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02c4800084070b001ce5120431634100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82c48400c40731020df5f24061e34100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/c24484008487010288e43240c163c100
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82448c00c48f110289e42144e1e34780
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02408200048d01008876330443e34000
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82c48800848d0300884ea80441e14200
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/82c68000048f09008844200080e34080
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02c68200848d0300825e2a0490c34200
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02468000048f0300946f2200a0c3c200
+	ln -s -f $INST_DIR/busy_i ~/.icons/default/cursors/02408000448f110288763900c0634f80
+fi
+
+# Not identified cursers, marked with question mark
+ln -s -f $INST_DIR/aero_helpsel ~/.icons/default/cursors/fe31009d026630cf02dc409b06f9ffcc
+echo "Done!"
