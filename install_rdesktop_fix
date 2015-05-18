@@ -20,6 +20,7 @@ if [ $# -gt 2 ]; then
 	INST_DIR=$1
 else
 	INST_DIR="$HOME/.icons/aero_cursors"
+	mkdir -p $HOME/.icons/default/cursors
 fi
 
 echo "Install cursors to fix rdesktop in $INST_DIR? [Y] / [n]"
@@ -60,6 +61,8 @@ rm xcursorgen/*.png
 # http://unix.stackexchange.com/questions/140096/how-to-override-custom-mouse-cursor-with-xcursor
 # Identified, not animated cursers
 echo "Linking cursors for rdesktop."
+mkdir -p $HOME/.icons/default/cursors
+
 ln -s -f $INST_DIR/aero_arrow ~/.icons/default/cursors/24020000002800000528000084810000  # xterm
 ln -s -f $INST_DIR/aero_select ~/.icons/default/cursors/00000000017e000002fc000000000000  # right_ptr
 ln -s -f $INST_DIR/aero_alt ~/.icons/default/cursors/00000093000010860000631100006609  # plus
