@@ -15,6 +15,9 @@ if [ $# -lt 1 ] || [[ $1 == *"help"* ]] || [[ $1 == *"?"* ]]; then
 	exit
 fi
 
+# Check Dependency
+command -v icotool >/dev/null 2>&1 || { echo >&2 "You are missing the dependency: 'icoutils'. Specifically the tool: 'icotool'.  Aborting."; exit 1; }
+
 # Create installation directory if needed
 if [ $# -gt 2 ]; then
 	INST_DIR=$1
